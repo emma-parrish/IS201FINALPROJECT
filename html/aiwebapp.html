@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .menu-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: navy;
+            color: white;
+            padding: 10px 20px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            box-sizing: border-box;
+        }
+
+        .menu-bar div:first-child {
+            font-weight: bold;
+        }
+
+        .menu-bar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 15px;
+            font-weight: bold;
+        }
+
+        .menu-bar div {
+            margin: 0 10px;
+        }
+
+        .menu-bar a:hover {
+            text-decoration: underline;
+        }
+
+        .game-container {
+            margin-top: 80px;
+            text-align: center;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            gap: 10px;
+            margin: 20px auto;
+            justify-content: center;
+        }
+
+        .tile {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #d3d6da;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .correct {
+            background-color: #6aaa64;
+            color: white;
+            border: none;
+        }
+
+        .present {
+            background-color: #c9b458;
+            color: white;
+            border: none;
+        }
+
+        .absent {
+            background-color: #787c7e;
+            color: white;
+            border: none;
+        }
+
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px auto;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            margin: 5px 0;
+        }
+
+        .key {
+            width: 40px;
+            height: 58px;
+            margin: 3px;
+            background-color: #d3d6da;
+            border: none;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            box-sizing: border-box;
+            padding: 0 5px;
+        }
+
+        .key.correct {
+            background-color: #6aaa64;
+            color: white;
+        }
+
+        .key.present {
+            background-color: #c9b458;
+            color: white;
+        }
+
+        .key.absent {
+            background-color: #787c7e;
+            color: white;
+        }
+
+        .key:hover {
+            background-color: #b0b3b5;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .keyboard-row.special {
+            justify-content: space-between;
+            width: 280px; /* Adjusted width to fit ENTER and BACKSPACE */
+        }
+
+        .key-wide {
+            width: 80px; /* Make ENTER and BACKSPACE wider */
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-bar">
+        <div>MENU</div>
+        <div>
+            <a href="../scratch.html">SCRATCH PAGE</a>
+
+            <a href="../index.html">RESUME</a>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <h1>Wordle</h1>
+        <div class="board" id="board">
+            <!-- Tiles will be dynamically generated here -->
+        </div>
+        <div class="keyboard" id="keyboard">
+            <!-- Keyboard will be dynamically generated here -->
+        </div>
+        <div class="feedback" id="feedback"></div>
+    </div>
+
+    <script>
+        const targetWord = "apple"; // Replace with your desired word
+        const maxGuesses = 6;
+        let currentGuess = "";
+        let guessCount = 0;
+
+        const board = document.getElementById("board");
+        const keyboard = document.getElementById("keyboard");
+
+        // Initialize the board
+        for (let i = 0; i < maxGuesses; i++) {
+            for (let j = 0; j < 5; j++) {
+                const tile = document.createElement("div");
+                tile.classList.add("tile");
+                tile.id = `tile-${i}-${j}`;
+                board.appendChild(tile);
+            }
+        }
+
+        // Initialize the keyboard
+        const row1 = "qwertyuiop".split("");
+        const row2 = "asdfghjkl".split("");
+        const row3 = "zxcvbnm".split(""); // Alphabet row
+
+        // Create keyboard rows
+        createKeyboardRow(row1);
+        createKeyboardRow(row2);
+        createKeyboardRow(row3);
+        createKeyboardRow(["ENTER", "BACKSPACE"]); // Special keys row
+
+        function createKeyboardRow(keys) {
+            const row = document.createElement("div");
+            row.classList.add("keyboard-row");
+
+            if (keys.includes("ENTER") || keys.includes("BACKSPACE")) {
+                row.classList.add("special"); // Apply special row style
+            }
+
+            keys.forEach(key => {
+                const keyElement = document.createElement("button");
+                keyElement.textContent = key.toUpperCase();
+                keyElement.classList.add("key");
+                if (key === "ENTER" || key === "BACKSPACE") {
+                    keyElement.classList.add("key-wide"); // Make ENTER and BACKSPACE wider
+                }
+                keyElement.onclick = () => handleKeyPress(key);
+                row.appendChild(keyElement);
+            });
+            keyboard.appendChild(row);
+        }
+
+        function handleKeyPress(key) {
+            if (key === "BACKSPACE") {
+                currentGuess = currentGuess.slice(0, -1);
+            } else if (key === "ENTER") {
+                submitGuess();
+            } else if (currentGuess.length < 5) {
+                currentGuess += key;
+            }
+            updateGuessDisplay();
+        }
+
+        function updateGuessDisplay() {
+            for (let i = 0; i < 5; i++) {
+                const tile = document.getElementById(`tile-${guessCount}-${i}`);
+                tile.textContent = currentGuess[i] || "";
+            }
+        }
+
+        function submitGuess() {
+            if (currentGuess.length !== 5) {
+                showFeedback("Please complete your guess before submitting.");
+                return;
+            }
+
+            if (guessCount >= maxGuesses) {
+                showFeedback("No more guesses left! Game over.");
+                return;
+            }
+
+            for (let i = 0; i < 5; i++) {
+                const tile = document.getElementById(`tile-${guessCount}-${i}`);
+                if (currentGuess[i] === targetWord[i]) {
+                    tile.classList.add("correct");
+                    markKey(currentGuess[i], "correct");
+                } else if (targetWord.includes(currentGuess[i])) {
+                    tile.classList.add("present");
+                    markKey(currentGuess[i], "present");
+                } else {
+                    tile.classList.add("absent");
+                    markKey(currentGuess[i], "absent");
+                }
+            }
+
+            if (currentGuess === targetWord) {
+                showFeedback("🎉 Correct! You guessed the word!");
+                return;
+            }
+
+            currentGuess = "";
+            guessCount++;
+
+            if (guessCount >= maxGuesses) {
+                showFeedback(`Game over! The word was ${targetWord}.`);
+            }
+        }
+
+        function markKey(key, status) {
+            const keyElement = Array.from(keyboard.querySelectorAll(".key"))
+                .find(k => k.textContent === key.toUpperCase());
+            if (keyElement) {
+                keyElement.classList.add(status);
+            }
+        }
+
+        function showFeedback(message) {
+            const feedback = document.getElementById("feedback");
+            feedback.textContent = message;
+        }
+    </script>
+</body>
+</html>
+

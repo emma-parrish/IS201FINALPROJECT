@@ -1,0 +1,57 @@
+body{
+    background-color: rgb(95, 214, 253);
+    color: white;
+    font-family:'Courier New', Courier, monospace;
+    }
+    h1, h2, h3, h4, h5, h6{
+        color: rgb(58, 150, 186);
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        font-style:italic
+    }
+    .main-content{
+        margin-left:220px;
+        padding:20px;
+    }
+    .sidebar{
+        background-color: rgb(250, 205, 205);
+        width:200px;
+        height:100%;
+        left:0;
+        padding:15px;
+        position:fixed;
+        color: white;
+        font-weight: bold;
+    }
+    .sidebar ul li{
+    list-stlye:none;
+    padding:0;
+    }
+    .sidebar ul li{
+        margin:15px 0;
+    ul li a{
+        color:white
+    }
+    .s
+    .sididebar ul li a:hover{
+        text-decoration: underline;
+    }
+    .navbar{
+        padding:10px;
+        display:flex;
+        justify-content: space-around;
+        align-items:center;
+        color:white;
+    }
+    .navbar a{
+        color:white;
+    }
+    .navbar a:hover{
+        background-color: white;
+        border-radius:5px;
+    }
+    .box-model{
+        padding:15px;
+        background-color: lightblue;
+        border:5px solid yellow;
+        margin:20px;
+    }
